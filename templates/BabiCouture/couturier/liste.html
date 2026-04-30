@@ -1,0 +1,20 @@
+{% extends 'BabiCouture/base.html' %}
+
+{% block title %}Liste des couturiers - Babi Couture{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">Couturiers</h1>
+    <div class="grid gap-4 md:grid-cols-2">
+        {% for c in couturiers %}
+        <div class="bg-white rounded-xl shadow p-4">
+            <h2 class="font-semibold">{{ c.user.get_full_name|default:c.user.username }}</h2>
+            <p class="text-sm text-gray-600">{{ c.specialite|default:"" }}</p>
+            <a href="{% url 'details_couturier' c.id %}" class="inline-block mt-3 text-orange-600 hover:text-orange-700">Voir le profil</a>
+        </div>
+        {% empty %}
+        <p class="text-gray-600">Aucun couturier disponible.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

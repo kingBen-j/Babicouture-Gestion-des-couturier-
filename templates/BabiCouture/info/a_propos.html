@@ -1,0 +1,13 @@
+{% extends 'BabiCouture/base.html' %}
+{% block title %}À propos{% endblock %}
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-3xl">
+  <h1 class="text-3xl font-bold text-gray-900 mb-4">À propos de Babi Couture</h1>
+  <p class="text-gray-600 leading-relaxed">Nous connectons les meilleurs couturiers aux clients en Côte d'Ivoire.</p>
+  <div class="grid grid-cols-3 gap-4 mt-8 text-center">
+    <div class="bg-white p-4 rounded-xl shadow-sm"><div class="text-2xl font-bold text-orange-600">{{ stats.couturiers }}</div><div class="text-sm text-gray-500">Couturiers</div></div>
+    <div class="bg-white p-4 rounded-xl shadow-sm"><div class="text-2xl font-bold text-orange-600">{{ stats.clients }}</div><div class="text-sm text-gray-500">Clients</div></div>
+    <div class="bg-white p-4 rounded-xl shadow-sm"><div class="text-2xl font-bold text-orange-600">{{ stats.commandes }}</div><div class="text-sm text-gray-500">Commandes</div></div>
+  </div>
+</div>
+{% endblock %}

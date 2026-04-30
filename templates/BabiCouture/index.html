@@ -1,0 +1,103 @@
+{% extends 'BabiCouture/base.html' %}
+
+{% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  
+{% block title %}Babi Couture – La couture à la demande{% endblock %}
+
+{% block content %}
+
+<section class="min-h-screen bg-[#FFF7ED] px-6 py-6">
+
+  <!-- HEADER -->
+  <header class="flex items-center justify-between mb-16">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center">
+        <span class="text-white font-bold text-lg">BC</span>
+      </div>
+      <span class="text-xl font-semibold text-gray-900">Babi Couture</span>
+    </div>
+
+    <div class="flex gap-4">
+    <!-- Ligne 22 - Corrigez l'URL -->
+      <a href="{% url 'login_view' %}"
+        class="bg-orange-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm shadow-sm hover:bg-orange-700 transition">
+          Se connecter
+      </a>
+    </div>
+  </header>
+
+  <!-- BADGE -->
+  <div class="flex justify-center mb-6">
+    <span class="bg-orange-100 text-orange-700 px-4 py-1.5 rounded-full text-sm font-medium tracking-wide">
+      La couture à la demande
+    </span>
+  </div>
+
+  <!-- TITRE -->
+  <h1 class="text-[40px] leading-tight font-extrabold text-center text-gray-900 mb-6">
+    Trouvez le couturier parfait<br>
+    pour vos tenues
+  </h1>
+
+  <!-- DESCRIPTION -->
+  <p class="text-center text-gray-600 text-lg leading-relaxed max-w-xl mx-auto mb-12">
+    Babi Couture connecte les clients aux meilleurs couturiers
+    d'Abidjan et de Côte d'Ivoire. Commandez des tenues sur mesure,
+    des retouches ou des réparations en toute simplicité.
+  </p>
+
+  <!-- CTA -->
+  <div class="space-y-4 max-w-md mx-auto mb-20">
+    <a href="{% url 'register_client' %}"
+       class="flex justify-center items-center bg-orange-600 text-white py-4 rounded-2xl font-semibold text-lg shadow-md hover:bg-orange-700 transition">
+      Commander maintenant
+    </a>
+
+    <a href="{% url 'register_couturier' %}"
+       class="flex justify-center items-center border border-gray-300 bg-white py-4 rounded-2xl font-semibold text-lg text-gray-800 hover:bg-gray-50 transition">
+      Devenir couturier
+    </a>
+  </div>
+
+  <!-- STATS -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-14 text-center max-w-4xl mx-auto">
+
+    <div>
+      <div class="mx-auto w-14 h-14 flex items-center justify-center rounded-full bg-orange-100 mb-4">
+        <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M9 20H4v-2a3 3 0 015.356-1.857M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+      </div>
+      <h3 class="text-3xl font-bold text-gray-900">500+</h3>
+      <p class="text-gray-600">Couturiers qualifiés</p>
+    </div>
+
+    <div>
+      <div class="mx-auto w-14 h-14 flex items-center justify-center rounded-full bg-orange-100 mb-4">
+        <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M9 12l2 2 4-4M7 20h10a2 2 0 002-2V6a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+      </div>
+      <h3 class="text-3xl font-bold text-gray-900">10 000+</h3>
+      <p class="text-gray-600">Commandes réalisées</p>
+    </div>
+
+    <div>
+      <div class="mx-auto w-14 h-14 flex items-center justify-center rounded-full bg-orange-100 mb-4">
+        <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <h3 class="text-3xl font-bold text-gray-900">24h</h3>
+      <p class="text-gray-600">Réponse moyenne</p>
+    </div>
+
+  </div>
+
+</section>
+
+{% endblock %}

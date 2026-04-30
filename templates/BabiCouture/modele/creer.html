@@ -1,0 +1,14 @@
+{% extends 'BabiCouture/base.html' %}
+
+{% block title %}Creer un modele - Babi Couture{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+    <h1 class="text-2xl font-bold mb-6">Creer un modele</h1>
+    <form method="post" enctype="multipart/form-data" class="bg-white rounded-xl shadow p-6 space-y-4">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">Enregistrer</button>
+    </form>
+</div>
+{% endblock %}

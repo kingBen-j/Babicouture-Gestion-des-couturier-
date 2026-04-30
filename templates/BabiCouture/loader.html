@@ -1,0 +1,140 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Babi Couture - Chargement</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-orange-50 flex items-center justify-center h-screen">
+    <div class="text-center p-8">
+        <div class="w-20 h-20 mx-auto mb-6 bg-orange-100 rounded-full flex items-center justify-center">
+            <div class="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+        
+        <h1 class="text-4xl font-bold text-orange-600 mb-3">Babi Couture</h1>
+        <p class="text-gray-600 text-lg mb-8">Votre plateforme de couture en ligne</p>
+        
+        <!-- Bouton principal -->
+        <button id="enterBtn"
+                class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-xl text-lg shadow-lg transition duration-300 cursor-pointer">
+            Entrer sur le site →
+        </button>
+        
+        <div class="mt-6 text-gray-500 text-sm">
+            <p id="countdown">Préparation...</p>
+            <p id="status" class="text-xs mt-1"></p>
+        </div>
+        
+        <!-- Fallback manuel -->
+        <div id="fallback" class="mt-8 p-4 bg-orange-100 rounded-lg hidden">
+            <p class="text-orange-800 font-semibold">Redirection bloquée</p>
+            <p class="text-sm text-orange-700 mb-2">Cliquez sur l'un des liens ci-dessous :</p>
+            <div class="flex flex-col gap-2">
+                <a href="{% url 'home' %}" class="text-orange-600 hover:text-orange-800 underline">Page d'accueil</a>
+                <a href="/" class="text-orange-600 hover:text-orange-800 underline">Racine du site</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const HOME_URL = "{% url 'home' %}";
+        // Variables d'état
+        let isRedirecting = false;
+        let countdownInterval;
+        
+        // Fonction pour mettre à jour le statut
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = 'text-xs mt-1 ' + 
+                (type === 'error' ? 'text-red-500' : 
+                 type === 'success' ? 'text-green-500' : 'text-gray-500');
+        }
+        
+        // Fonction de redirection fiable
+        function redirectToHome() {
+            if (isRedirecting) return;
+
+            isRedirecting = true;
+            updateStatus('Redirection en cours...', 'success');
+
+            // Arrêter le compte à rebours
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+
+            setTimeout(() => {
+                window.location.assign(HOME_URL);
+            }, 400);
+
+            // Timeout de sécurité : si la page est encore visible, proposer les liens manuels
+            setTimeout(() => {
+                if (!document.hidden) {
+                    showFallback();
+                }
+            }, 3000);
+        }
+        
+        // Afficher les options manuelles
+        function showFallback() {
+            updateStatus('Utilisez les liens manuels ci-dessous', 'error');
+            document.getElementById('fallback').classList.remove('hidden');
+        }
+        
+        // Démarrer le compte à rebours
+        function startCountdown() {
+            let seconds = 3;
+            const countdownElement = document.getElementById('countdown');
+            
+            countdownElement.textContent = `Redirection automatique dans ${seconds} secondes...`;
+            
+            countdownInterval = setInterval(function() {
+                seconds--;
+                if (seconds <= 0) {
+                    clearInterval(countdownInterval);
+                    countdownElement.textContent = 'Redirection...';
+                    redirectToHome();
+                } else {
+                    countdownElement.textContent = `Redirection automatique dans ${seconds} seconde${seconds > 1 ? 's' : ''}...`;
+                }
+            }, 1000);
+        }
+        
+        // Initialiser quand la page est prête
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('Page chargée', 'success');
+            
+            // Configurer le bouton
+            document.getElementById('enterBtn').addEventListener('click', redirectToHome);
+            
+            // Démarrer le compte à rebours
+            startCountdown();
+            
+            // Détection de problèmes
+            window.addEventListener('beforeunload', function() {
+                updateStatus('Départ détecté...', 'success');
+            });
+            
+            // Vérifier si la page est en arrière-plan (certains navigateurs limitent les scripts)
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    updateStatus('Page en arrière-plan', 'info');
+                }
+            });
+        });
+        
+        // Redirection automatique au cas où l'événement DOMContentLoaded ne se déclenche pas
+        setTimeout(function() {
+            if (!isRedirecting) {
+                updateStatus('Redirection de sécurité...', 'info');
+                redirectToHome();
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

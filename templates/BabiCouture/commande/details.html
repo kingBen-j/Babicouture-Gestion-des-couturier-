@@ -1,0 +1,24 @@
+{% extends 'BabiCouture/base.html' %}
+{% block title %}Détails commande{% endblock %}
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-3xl">
+  <h1 class="text-2xl font-bold text-gray-900 mb-4">Commande #{{ commande.id }}</h1>
+  <div class="bg-white p-6 rounded-xl shadow-sm space-y-2">
+    <p><span class="font-semibold">Titre :</span> {{ commande.titre|default:"-" }}</p>
+    <p><span class="font-semibold">Statut :</span> {{ commande.get_statut_display }}</p>
+    <p><span class="font-semibold">Client :</span> {{ commande.client }}</p>
+    <p><span class="font-semibold">Couturier :</span> {{ commande.couturier }}</p>
+    <p><span class="font-semibold">Prix :</span> {{ commande.prix_final|default:commande.prix_propose|default:"Non défini" }} XOF</p>
+    <p><span class="font-semibold">Date :</span> {{ commande.date_commande }}</p>
+    <p><span class="font-semibold">Description :</span></p>
+    <p class="text-gray-700">{{ commande.description|default:"-" }}</p>
+  </div>
+  <div class="mt-6 flex gap-3">
+    {% if user.client_profile %}
+      <a href="{% url 'mes_commandes_client' %}" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">Retour</a>
+    {% else %}
+      <a href="{% url 'commandes_couturier' %}" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">Retour</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

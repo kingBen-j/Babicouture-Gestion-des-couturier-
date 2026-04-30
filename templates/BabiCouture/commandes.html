@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commandes - Babi Couture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-en_attente {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        .status-confirmee {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        .status-en_cours {
+            background-color: #f5d0fe;
+            color: #86198f;
+        }
+        .status-livree {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .status-terminee {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .status-annulee {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        .filter-active {
+            background-color: #3b82f6;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+   
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- En-tête avec statistiques -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Commandes Reçues</h1>
+                <p class="text-gray-600">Gérez toutes les commandes de votre atelier</p>
+            </div>
+
+            <!-- Cartes de statistiques -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Total commandes -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 font-medium">Total Commandes</p>
+                            <p class="text-3xl font-bold mt-2">{{ stats.total }}</p>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-clipboard-list text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Commandes en attente -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 font-medium">En attente</p>
+                            <p class="text-3xl font-bold mt-2">{{ stats.en_attente }}</p>
+                        </div>
+                        <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- En cours -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 font-medium">En cours</p>
+                            <p class="text-3xl font-bold mt-2">{{ stats.en_cours }}</p>
+                        </div>
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-hands text-purple-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Revenus -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 font-medium">Revenus totaux</p>
+                            <p class="text-3xl font-bold mt-2">{{ revenus_totaux|floatformat:0 }} FCFA</p>
+                        </div>
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-money-bill-wave text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtres et recherche -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <!-- Filtres par statut -->
+                    <div class="flex flex-wrap gap-2">
+                        <a href="{% url 'commandes_couturier' %}" 
+                           class="px-4 py-2 rounded-lg {% if not statut_filtre %}filter-active{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
+                            Toutes ({{ stats.total }})
+                        </a>
+                        <a href="?statut=en_attente" 
+                           class="px-4 py-2 rounded-lg {% if statut_filtre == 'en_attente' %}filter-active{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
+                            En attente ({{ stats.en_attente }})
+                        </a>
+                        <a href="?statut=en_cours" 
+                           class="px-4 py-2 rounded-lg {% if statut_filtre == 'en_cours' %}filter-active{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
+                            En cours ({{ stats.en_cours }})
+                        </a>
+                        <a href="?statut=confirmee" 
+                           class="px-4 py-2 rounded-lg {% if statut_filtre == 'confirmee' %}filter-active{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
+                            Confirmées ({{ stats.confirmee }})
+                        </a>
+                        <a href="?statut=terminee" 
+                           class="px-4 py-2 rounded-lg {% if statut_filtre == 'terminee' %}filter-active{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
+                            Terminées ({{ stats.terminee }})
+                        </a>
+                    </div>
+
+                    <!-- Recherche -->
+                    <form method="GET" class="flex gap-2">
+                        <div class="relative">
+                            <input type="text" 
+                                   name="search" 
+                                   value="{{ search_query|default:'' }}"
+                                   placeholder="Rechercher une commande..." 
+                                   class="w-full md:w-64 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <button type="submit" class="absolute right-3 top-3 text-gray-400 hover:text-blue-600">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        {% if statut_filtre %}
+                        <input type="hidden" name="statut" value="{{ statut_filtre }}">
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+
+            <!-- Liste des commandes -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                {% if commandes %}
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-200">
+                                <th class="text-left py-4 px-6 text-sm font-medium text-gray-700">Commande</th>
+                                <th class="text-left py-4 px-6 text-sm font-medium text-gray-700">Client</th>
+                                <th class="text-left py-4 px-6 text-sm font-medium text-gray-700">Date</th>
+                                <th class="text-left py-4 px-6 text-sm font-medium text-gray-700">Montant</th>
+                                <th class="text-left py-4 px-6 text-sm font-medium text-gray-700">Statut</th>
+                                <th class="text-left py-4 px-6 text-sm font-medium text-gray-700">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for commande in commandes %}
+                            <tr class="hover:bg-gray-50">
+                                <!-- N° Commande -->
+                                <td class="py-4 px-6">
+                                    <div>
+                                        <div class="font-medium text-gray-900">
+                                            #{{ commande.id }} - {{ commande.titre|truncatechars:30 }}
+                                        </div>
+                                        {% if commande.modele %}
+                                        <div class="text-sm text-gray-500 mt-1">
+                                            Modèle: {{ commande.modele.titre }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </td>
+
+                                <!-- Client -->
+                                <td class="py-4 px-6">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                            <i class="fas fa-user text-blue-600 text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-medium text-gray-900">
+                                                {{ commande.client.user.get_full_name|default:commande.client.user.username }}
+                                            </div>
+                                            <div class="text-sm text-gray-500">
+                                                {{ commande.client.user.email }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Date -->
+                                <td class="py-4 px-6">
+                                    <div class="text-sm text-gray-900">
+                                        {{ commande.date_commande|date:"d/m/Y" }}
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        Livraison: {{ commande.date_livraison_prevue|date:"d/m/Y" }}
+                                    </div>
+                                </td>
+
+                                <!-- Montant -->
+                                <td class="py-4 px-6">
+                                    <div class="font-medium text-gray-900">
+                                        {{ commande.prix_final|default:commande.prix_propose }} FCFA
+                                    </div>
+                                    {% if commande.prix_propose and commande.prix_final %}
+                                    <div class="text-xs text-gray-500">
+                                        Proposé: {{ commande.prix_propose }} FCFA
+                                    </div>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Statut -->
+                                <td class="py-4 px-6">
+                                    {% if commande.statut == 'en_attente' %}
+                                    <span class="status-badge status-en_attente">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        En attente
+                                    </span>
+                                    {% elif commande.statut == 'confirmee' %}
+                                    <span class="status-badge status-confirmee">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        Confirmée
+                                    </span>
+                                    {% elif commande.statut == 'en_cours' %}
+                                    <span class="status-badge status-en_cours">
+                                        <i class="fas fa-hands mr-1"></i>
+                                        En cours
+                                    </span>
+                                    {% elif commande.statut == 'livree' %}
+                                    <span class="status-badge status-livree">
+                                        <i class="fas fa-truck mr-1"></i>
+                                        Livrée
+                                    </span>
+                                    {% elif commande.statut == 'terminee' %}
+                                    <span class="status-badge status-terminee">
+                                        <i class="fas fa-check-double mr-1"></i>
+                                        Terminée
+                                    </span>
+                                    {% elif commande.statut == 'annulee' %}
+                                    <span class="status-badge status-annulee">
+                                        <i class="fas fa-times-circle mr-1"></i>
+                                        Annulée
+                                    </span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="py-4 px-6">
+                                    <div class="flex space-x-2">
+                                        <a href="{% url 'details_commande' commande.id %}" 
+                                           class="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 text-sm font-medium"
+                                           title="Voir détails">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        
+                                        {% if commande.statut == 'en_attente' %}
+                                        <a href="{% url 'modifier_statut_commande' commande.id %}" 
+                                           class="px-3 py-1 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 text-sm font-medium"
+                                           title="Traiter la commande">
+                                            <i class="fas fa-cog"></i>
+                                        </a>
+                                        {% endif %}
+                                        
+                                        <a href="{% url 'envoyer_message_dest' commande.client.user.id %}" 
+                                           class="px-3 py-1 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 text-sm font-medium"
+                                           title="Contacter le client">
+                                            <i class="fas fa-envelope"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if total_pages > 1 %}
+                <div class="border-t border-gray-200 p-4">
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm text-gray-600">
+                            Affichage de {{ commandes.start_index }} à {{ commandes.end_index }} sur {{ commandes.paginator.count }} commandes
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            {% if page > 1 %}
+                            <a href="?page={{ page|add:'-1' }}{% if statut_filtre %}&statut={{ statut_filtre }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                               class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                            {% endif %}
+
+                            <div class="flex space-x-1">
+                                {% for p in commandes.paginator.page_range %}
+                                    {% if p >= page|add:'-2' and p <= page|add:'2' %}
+                                    <a href="?page={{ p }}{% if statut_filtre %}&statut={{ statut_filtre }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                                       class="px-3 py-2 rounded-lg {% if p == page %}bg-blue-600 text-white{% else %}border border-gray-300 hover:bg-gray-50{% endif %}">
+                                        {{ p }}
+                                    </a>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+
+                            {% if page < total_pages %}
+                            <a href="?page={{ page|add:'1' }}{% if statut_filtre %}&statut={{ statut_filtre }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                               class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% else %}
+                <!-- Aucune commande -->
+                <div class="p-12 text-center">
+                    <div class="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-clipboard-list text-gray-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                        {% if search_query %}
+                        Aucune commande trouvée
+                        {% elif statut_filtre %}
+                        Aucune commande avec ce statut
+                        {% else %}
+                        Aucune commande pour le moment
+                        {% endif %}
+                    </h3>
+                    <p class="text-gray-600 mb-6">
+                        {% if search_query %}
+                        Aucune commande ne correspond à votre recherche "{{ search_query }}"
+                        {% elif statut_filtre %}
+                        Vous n'avez pas de commandes avec le statut "{{ statut_filtre }}"
+                        {% else %}
+                        Les commandes de vos clients apparaîtront ici
+                        {% endif %}
+                    </p>
+                    {% if search_query or statut_filtre %}
+                    <a href="{% url 'commandes_couturier' %}" 
+                       class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
+                        Voir toutes les commandes
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Résumé des statistiques -->
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Commandes par statut -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Répartition par statut</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">En attente</span>
+                            <span class="font-medium">{{ stats.en_attente }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Confirmées</span>
+                            <span class="font-medium">{{ stats.confirmee }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">En cours</span>
+                            <span class="font-medium">{{ stats.en_cours }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Livrées</span>
+                            <span class="font-medium">{{ stats.livree }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Terminées</span>
+                            <span class="font-medium">{{ stats.terminee }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Annulées</span>
+                            <span class="font-medium">{{ stats.annulee }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prochaines livraisons -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Prochaines livraisons</h3>
+                    <div class="space-y-3">
+                        {% for commande in commandes|slice:":3" %}
+                            {% if commande.date_livraison_prevue %}
+                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <div class="font-medium text-gray-900">
+                                        #{{ commande.id }}
+                                    </div>
+                                    <div class="text-sm text-gray-500">
+                                        {{ commande.date_livraison_prevue|date:"d/m/Y" }}
+                                    </div>
+                                </div>
+                                <span class="status-badge {% if commande.statut == 'en_cours' %}status-en_cours{% elif commande.statut == 'confirmee' %}status-confirmee{% else %}status-en_attente{% endif %}">
+                                    {{ commande.get_statut_display }}
+                                </span>
+                            </div>
+                            {% endif %}
+                        {% empty %}
+                        <p class="text-gray-500 text-center py-4">Aucune livraison prévue</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Actions rapides -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Actions rapides</h3>
+                    <div class="space-y-3">
+                        <a href="{% url 'mes_modeles' %}" 
+                           class="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition">
+                            <span class="flex items-center">
+                                <i class="fas fa-palette text-blue-600 mr-3"></i>
+                                Voir mes modèles
+                            </span>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </a>
+                        <a href="{% url 'boite_reception' %}" 
+                           class="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition">
+                            <span class="flex items-center">
+                                <i class="fas fa-envelope text-blue-600 mr-3"></i>
+                                Messagerie
+                            </span>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </a>
+                        <a href="{% url 'profil_couturier' %}" 
+                           class="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition">
+                            <span class="flex items-center">
+                                <i class="fas fa-user-cog text-blue-600 mr-3"></i>
+                                Modifier mon profil
+                            </span>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <script>
+        // Script pour les badges de statut
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animation des cartes de statistiques
+            const statCards = document.querySelectorAll('.bg-white.rounded-xl.shadow-sm');
+            statCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.transition = 'transform 0.2s ease';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

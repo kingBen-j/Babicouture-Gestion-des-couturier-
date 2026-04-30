@@ -1,0 +1,26 @@
+{% extends 'BabiCouture/base.html' %}
+
+{% block title %}Gestion utilisateurs - Babi Couture{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">Gestion des utilisateurs</h1>
+    <div class="bg-white rounded-xl shadow overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50"><tr><th class="text-left p-3">Utilisateur</th><th class="text-left p-3">Role</th><th class="text-left p-3">Statut</th><th class="text-left p-3">Action</th></tr></thead>
+            <tbody>
+                {% for u in utilisateurs %}
+                <tr class="border-t">
+                    <td class="p-3">{{ u.username }}</td>
+                    <td class="p-3">{% if u.client_profile %}Client{% elif u.couturier_profile %}Couturier{% else %}-{% endif %}</td>
+                    <td class="p-3">{% if u.is_active %}Actif{% else %}Inactif{% endif %}</td>
+                    <td class="p-3"><a href="{% url 'toggle_user_active' u.id %}" class="text-orange-600 hover:text-orange-700">Basculer</a></td>
+                </tr>
+                {% empty %}
+                <tr><td class="p-3" colspan="4">Aucun utilisateur.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

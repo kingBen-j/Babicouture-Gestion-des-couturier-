@@ -1,0 +1,24 @@
+{% extends 'BabiCouture/base.html' %}
+
+{% block title %}Recherche - Babi Couture{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">Resultats de recherche</h1>
+    <form method="get" class="mb-6">
+        <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Rechercher..." class="w-full md:w-2/3 px-4 py-2 border rounded-lg" />
+    </form>
+
+    <div class="grid md:grid-cols-2 gap-4">
+        {% for modele in modeles %}
+        <div class="bg-white rounded-xl shadow p-4">
+            <h2 class="font-semibold">{{ modele.nom }}</h2>
+            <p class="text-sm text-gray-600">{{ modele.description|truncatechars:120 }}</p>
+            <a class="text-orange-600 hover:text-orange-700" href="{% url 'details_modele' modele.id %}">Voir</a>
+        </div>
+        {% empty %}
+        <p class="text-gray-600">Aucun modele trouve.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

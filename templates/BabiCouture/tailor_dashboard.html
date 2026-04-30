@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord Couturier - Babi Couture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
+            min-height: 100vh;
+        }
+        
+        .dashboard-card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+        
+        .dashboard-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
+        }
+        
+        .nav-link {
+            transition: all 0.2s ease;
+        }
+        
+        .nav-link:hover {
+            background-color: #fff7ed;
+            transform: translateX(5px);
+        }
+        
+        .nav-link.active {
+            background-color: #ffedd5;
+            border-right: 4px solid #f97316;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-in-progress {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-completed {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .model-card {
+            transition: all 0.3s ease;
+        }
+        
+        .model-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #f97316;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ea580c;
+        }
+        
+        .sidebar {
+            scrollbar-width: thin;
+            scrollbar-color: #f97316 #f1f1f1;
+        }
+        
+        .avatar {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(249, 115, 22, 0.2);
+        }
+    </style>
+</head>
+<body class="flex">
+    <!-- Sidebar -->
+    <div class="w-64 bg-white shadow-xl min-h-screen hidden md:block">
+        <div class="p-6 border-b border-gray-100">
+            <div class="flex items-center space-x-3">
+                <div class="avatar w-12 h-12 rounded-full flex items-center justify-center text-white">
+                    <i class="fas fa-user-tie text-lg"></i>
+                </div>
+                <div>
+                    <h2 class="font-bold text-gray-900">{{ couturier.nom_atelier|default:couturier.user.username }}</h2>
+                    <p class="text-sm text-gray-600">Couturier</p>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="p-4 space-y-2 sidebar">
+            <a href="{% url 'tailor_dashboard' %}" class="nav-link active flex items-center space-x-3 p-3 rounded-lg">
+                <i class="fas fa-tachometer-alt text-orange-600 w-5"></i>
+                <span>Tableau de Bord</span>
+            </a>
+            
+            <a href="{% url 'mes_modeles' %}" class="nav-link flex items-center space-x-3 p-3 rounded-lg">
+                <i class="fas fa-palette text-orange-600 w-5"></i>
+                <span>Mes Modèles</span>
+            </a>
+            
+            <a href="{% url 'commandes_couturier' %}" class="nav-link flex items-center space-x-3 p-3 rounded-lg">
+                <i class="fas fa-clipboard-list text-orange-600 w-5"></i>
+                <span>Commandes</span>
+                {% if commandes_total %}
+                <span class="ml-auto bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full">
+                    {{ commandes_total }}
+                </span>
+                {% endif %}
+            </a>
+            
+            <a href="{% url 'boite_reception' %}" class="nav-link flex items-center space-x-3 p-3 rounded-lg">
+                <i class="fas fa-envelope text-orange-600 w-5"></i>
+                <span>Messagerie</span>
+                {% if messages_non_lus %}
+                <span class="ml-auto bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full">
+                    {{ messages_non_lus }}
+                </span>
+                {% endif %}
+            </a>
+            
+            <a href="#" class="nav-link flex items-center space-x-3 p-3 rounded-lg">
+                <i class="fas fa-star text-orange-600 w-5"></i>
+                <span>Évaluations</span>
+            </a>
+            
+            
+            <div class="pt-8 mt-8 border-t border-gray-100">
+                <a href="{% url 'logout' %}" class="flex items-center space-x-3 p-3 rounded-lg text-red-600 hover:bg-red-50">
+                    <i class="fas fa-sign-out-alt w-5"></i>
+                    <span>Déconnexion</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+    
+    <!-- Mobile Header -->
+    <div class="md:hidden bg-white shadow-lg">
+        <div class="flex items-center justify-between p-4">
+            <button id="menuToggle" class="text-gray-600">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <div class="flex items-center space-x-3">
+                <div class="avatar w-10 h-10 rounded-full flex items-center justify-center text-white">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div>
+                    <h2 class="font-bold text-sm">{{ couturier.nom_atelier|default:couturier.user.username }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-4 md:p-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Bienvenue, {{ couturier.user.username }} 👨‍💼</h1>
+            <p class="text-gray-600">Gérez votre atelier et vos créations</p>
+        </div>
+        
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="dashboard-card stats-card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 font-medium">Total Commandes</p>
+                        <p class="text-3xl font-bold mt-2">{{ commandes_total|default:"0" }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-clipboard-list text-orange-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center text-sm text-gray-500">
+                        <span class="flex-1">En cours : {{ commandes_en_cours|default:"0" }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-card stats-card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 font-medium">Commandes Terminées</p>
+                        <p class="text-3xl font-bold mt-2">{{ commandes_terminees|default:"0" }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-check-circle text-orange-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center text-sm text-gray-500">
+                        <span class="flex-1">Taux de réussite : {% if commandes_total %} {{ commandes_terminees|add:"0"|floatformat:0 }}/{{ commandes_total }} {% else %} 0% {% endif %}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-card stats-card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 font-medium">Clients</p>
+                        <p class="text-3xl font-bold mt-2">{{ clients_total|default:"0" }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-users text-orange-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center text-sm text-gray-500">
+                        <span class="flex-1">Nouveaux ce mois : 0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-card stats-card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600 font-medium">Note Moyenne</p>
+                        <p class="text-3xl font-bold mt-2">{{ couturier.note_moyenne|default:"0"|floatformat:1 }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-star text-orange-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center text-sm text-gray-500">
+                        <span class="flex-1">Basée sur {{ couturier.nombre_avis|default:"0" }} avis</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Modèles Section -->
+                <div class="dashboard-card p-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+                        <div class="mb-4 sm:mb-0">
+                            <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                                <i class="fas fa-palette text-orange-600 mr-3"></i>
+                                Mes Modèles
+                            </h2>
+                            <p class="text-gray-600 mt-1">Votre catalogue de créations</p>
+                        </div>
+                        <a href="{% url 'mes_modeles' %}" class="btn-primary text-white px-5 py-2.5 rounded-xl font-semibold inline-flex items-center">
+                            <i class="fas fa-plus mr-2"></i>
+                            Ajouter un modèle
+                        </a>
+                    </div>
+                    
+                    {% if modeles %}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for modele in modeles %}
+                        <div class="model-card bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-orange-300">
+                            <div class="h-48 bg-gray-100 overflow-hidden">
+                                {% if modele.image %}
+                                <img src="{{ modele.image.url }}" alt="{{ modele.titre }}" class="w-full h-full object-cover hover:scale-105 transition duration-300">
+                                {% else %}
+                                <div class="w-full h-full flex items-center justify-center text-gray-400">
+                                    <i class="fas fa-image text-4xl"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-bold text-gray-900">{{ modele.titre }}</h3>
+                                    <span class="text-orange-600 font-bold">{{ modele.prix|default:"0" }} XOF</span>
+                                </div>
+                                <p class="text-gray-600 text-sm mb-4">
+                                    {{ modele.description|truncatewords:15 }}
+                                </p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs px-2 py-1 bg-orange-100 text-orange-800 rounded-full">
+                                        {{ modele.categorie|default:"Général" }}
+                                    </span>
+                                    <div class="text-xs text-gray-500">
+                                        <i class="fas fa-eye mr-1"></i>
+                                        {{ modele.vues|default:"0" }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-12">
+                        <div class="w-20 h-20 mx-auto bg-orange-100 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-palette text-orange-600 text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Aucun modèle disponible</h3>
+                        <p class="text-gray-600 mb-6">Commencez par ajouter votre première création</p>
+                        <a href="{% url 'mes_modeles' %}" class="btn-primary text-white px-6 py-3 rounded-xl font-semibold inline-flex items-center">
+                            <i class="fas fa-plus mr-2"></i>
+                            Créer mon premier modèle
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Commandes Section -->
+                <div class="dashboard-card p-6">
+                    <h2 class="text-xl font-bold text-gray-900 flex items-center mb-6">
+                        <i class="fas fa-clipboard-list text-orange-600 mr-3"></i>
+                        Commandes Récentes
+                    </h2>
+                    
+                    {% if commandes_total %}
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Client</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Modèle</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Date</th>
+                                    <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Example row - replace with actual data -->
+                                <tr class="border-b border-gray-100 hover:bg-orange-50">
+                                    <td class="py-3 px-4">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center mr-3">
+                                                <i class="fas fa-user text-orange-600 text-sm"></i>
+                                       
+                                   
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-6">
+                        <a href="#" class="text-orange-600 font-semibold hover:text-orange-700 inline-flex items-center">
+                            Voir toutes les commandes
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 mx-auto bg-orange-100 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-clipboard-list text-orange-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Aucune commande pour le moment</h3>
+                        <p class="text-gray-600">Vos commandes apparaîtront ici</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div class="space-y-8">
+                <!-- Profile Info Card -->
+                <div class="dashboard-card p-6">
+                    <h2 class="text-xl font-bold text-gray-900 flex items-center mb-6">
+                        <i class="fas fa-user-circle text-orange-600 mr-3"></i>
+                        Mon Atelier
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-store text-orange-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Nom de l'atelier</p>
+                                <p class="font-semibold">{{ couturier.nom_atelier|default:"Non renseigné" }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-clock text-orange-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Expérience</p>
+                                <p class="font-semibold">{{ couturier.annees_experience|default:"Non renseignée" }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-phone text-orange-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Téléphone</p>
+                                <p class="font-semibold">{{ couturier.telephone|default:"Non renseigné" }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-money-bill-wave text-orange-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Tarif horaire</p>
+                                <p class="font-semibold">{{ couturier.tarif_horaire|default:"0" }} FCFA/heure</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Specialties -->
+                        <div class="pt-4 border-t border-gray-100">
+                            <p class="text-sm text-gray-600 mb-3">Spécialités :</p>
+                            <div class="flex flex-wrap gap-2">
+                                {% if couturier.specialites %}
+                                    {% for specialite in couturier.specialites %}
+                                    <span class="text-xs px-3 py-1 bg-orange-100 text-orange-800 rounded-full">
+                                        {{ specialite }}
+                                    </span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-gray-500 text-sm">Aucune spécialité définie</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <a href="#" class="text-orange-600 font-semibold hover:text-orange-700 inline-flex items-center">
+                            <i class="fas fa-edit mr-2"></i>
+                            Modifier mon profil
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Messagerie Card -->
+                <div class="dashboard-card p-6">
+                    <h2 class="text-xl font-bold text-gray-900 flex items-center justify-between mb-6">
+                        <span class="flex items-center">
+                            <i class="fas fa-envelope text-orange-600 mr-3"></i>
+                            Messagerie
+                        </span>
+                        {% if messages_non_lus %}
+                        <span class="bg-orange-600 text-white text-xs px-2 py-1 rounded-full">
+                            {{ messages_non_lus }} nouveau(x)
+                        </span>
+                        {% endif %}
+                    </h2>
+                    
+                
+                    
+                    <div class="mt-6">
+                        <a href="{% url 'boite_reception' %}" class="w-full btn-primary text-white py-3 rounded-xl font-semibold text-center block">
+                            <i class="fas fa-paper-plane mr-2"></i>
+                            Nouveau message
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="dashboard-card p-6">
+                    <h2 class="text-xl font-bold text-gray-900 flex items-center mb-6">
+                        <i class="fas fa-bolt text-orange-600 mr-3"></i>
+                        Actions Rapides
+                    </h2>
+                    
+                    <div class="space-y-3">
+                        <a href="#" class="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+                            <span class="flex items-center">
+                                <i class="fas fa-plus-circle text-orange-600 mr-3"></i>
+                                Ajouter une photo portfolio
+                            </span>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </a>
+                        
+                        <a href="#" class="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+                            <span class="flex items-center">
+                                <i class="fas fa-calendar-alt text-orange-600 mr-3"></i>
+                                Voir mon agenda
+                            </span>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </a>
+                        
+                        <a href="#" class="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+                            <span class="flex items-center">
+                                <i class="fas fa-chart-line text-orange-600 mr-3"></i>
+                                Statistiques détaillées
+                            </span>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="fixed inset-0 bg-white z-50 transform translate-x-full transition-transform duration-300 md:hidden">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center space-x-3">
+                    <div class="avatar w-12 h-12 rounded-full flex items-center justify-center text-white">
+                        <i class="fas fa-user-tie text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-gray-900">{{ couturier.nom_atelier|default:couturier.user.username }}</h2>
+                        <p class="text-sm text-gray-600">Couturier</p>
+                    </div>
+                </div>
+                <button id="closeMenu" class="text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <nav class="space-y-2">
+                <a href="{% url 'tailor_dashboard' %}" class="nav-link active flex items-center space-x-3 p-3 rounded-lg">
+                    <i class="fas fa-tachometer-alt text-orange-600 w-5"></i>
+                    <span>Tableau de Bord</span>
+                </a>
+                
+                <a href="{% url 'mes_modeles' %}" class="nav-link flex items-center space-x-3 p-3 rounded-lg">
+                    <i class="fas fa-palette text-orange-600 w-5"></i>
+                    <span>Mes Modèles</span>
+                </a>
+                
+                <a href="#" class="nav-link flex items-center space-x-3 p-3 rounded-lg">
+                    <i class="fas fa-clipboard-list text-orange-600 w-5"></i>
+                    <span>Commandes</span>
+                </a>
+                
+                <a href="boite_reception" class="nav-link flex items-center space-x-3 p-3 rounded-lg">
+                    <i class="fas fa-envelope text-orange-600 w-5"></i>
+                    <span>Messagerie</span>
+                </a>
+                
+                <a href="#" class="nav-link flex items-center space-x-3 p-3 rounded-lg">
+                    <i class="fas fa-star text-orange-600 w-5"></i>
+                    <span>Évaluations</span>
+                </a>
+                
+                <a href="#" class="nav-link flex items-center space-x-3 p-3 rounded-lg">
+                    <i class="fas fa-cog text-orange-600 w-5"></i>
+                    <span>Paramètres</span>
+                </a>
+                
+                <a href="{% url 'logout' %}" class="flex items-center space-x-3 p-3 rounded-lg text-red-600 hover:bg-red-50 mt-8">
+                    <i class="fas fa-sign-out-alt w-5"></i>
+                    <span>Déconnexion</span>
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const closeMenu = document.getElementById('closeMenu');
+            
+            if (menuToggle) {
+                menuToggle.addEventListener('click', function() {
+                    mobileMenu.classList.remove('translate-x-full');
+                });
+            }
+            
+            if (closeMenu) {
+                closeMenu.addEventListener('click', function() {
+                    mobileMenu.classList.add('translate-x-full');
+                });
+            }
+            
+            // Close menu when clicking outside
+            mobileMenu.addEventListener('click', function(e) {
+                if (e.target === mobileMenu) {
+                    mobileMenu.classList.add('translate-x-full');
+                }
+            });
+            
+            // Stats animation
+            const statsCards = document.querySelectorAll('.stats-card');
+            statsCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+            
+            // Model cards hover effect
+            const modelCards = document.querySelectorAll('.model-card');
+            modelCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    const img = this.querySelector('img');
+                    if (img) {
+                        img.style.transform = 'scale(1.05)';
+                    }
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    const img = this.querySelector('img');
+                    if (img) {
+                        img.style.transform = 'scale(1)';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

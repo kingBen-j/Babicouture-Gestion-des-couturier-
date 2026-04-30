@@ -1,0 +1,18 @@
+{% extends 'BabiCouture/base.html' %}
+{% block title %}Message{% endblock %}
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-3xl">
+  <div class="bg-white p-6 rounded-xl shadow-sm mb-4">
+    <h1 class="text-xl font-bold text-gray-900 mb-2">{{ message.sujet }}</h1>
+    <p class="text-sm text-gray-500 mb-4">De {{ message.expediteur.username }} à {{ message.destinataire.username }} | {{ message.date_envoi }}</p>
+    <div class="text-gray-800 whitespace-pre-line">{{ message.contenu }}</div>
+    {% if message.piece_jointe %}
+      <p class="mt-4"><a href="{{ message.piece_jointe.url }}" class="text-orange-600 underline" target="_blank">Pièce jointe</a></p>
+    {% endif %}
+  </div>
+  <div class="flex gap-3">
+    <a href="{% url 'repondre_message' message.id %}" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700">Répondre</a>
+    <a href="{% url 'boite_reception' %}" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300">Retour</a>
+  </div>
+</div>
+{% endblock %}

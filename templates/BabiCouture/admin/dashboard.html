@@ -1,0 +1,18 @@
+{% extends 'BabiCouture/base.html' %}
+
+{% block title %}Dashboard admin - Babi Couture{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">Dashboard administrateur</h1>
+    <div class="grid md:grid-cols-3 gap-4">
+        <div class="bg-white rounded-xl shadow p-4"><p class="text-sm text-gray-600">Utilisateurs</p><p class="text-2xl font-bold">{{ stats.total_utilisateurs|default:0 }}</p></div>
+        <div class="bg-white rounded-xl shadow p-4"><p class="text-sm text-gray-600">Commandes</p><p class="text-2xl font-bold">{{ stats.total_commandes|default:0 }}</p></div>
+        <div class="bg-white rounded-xl shadow p-4"><p class="text-sm text-gray-600">Modeles</p><p class="text-2xl font-bold">{{ stats.total_modeles|default:0 }}</p></div>
+    </div>
+    <div class="mt-6 flex gap-3">
+        <a href="{% url 'gestion_utilisateurs' %}" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">Gerer les utilisateurs</a>
+        <a href="{% url 'statistiques_detaillees' %}" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">Voir les statistiques</a>
+    </div>
+</div>
+{% endblock %}

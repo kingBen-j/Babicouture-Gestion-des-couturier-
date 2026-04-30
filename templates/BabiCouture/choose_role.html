@@ -1,0 +1,21 @@
+{% extends 'BabiCouture/base.html' %}
+{% block title %}Choisir un rôle{% endblock %}
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-4">
+  <div class="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full text-center">
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">Bienvenue sur Babi Couture</h1>
+    <p class="text-gray-600 mb-8">Choisissez votre rôle pour continuer.</p>
+    <form method="post">
+      {% csrf_token %}
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <button type="submit" name="role" value="client" class="bg-orange-600 text-white py-3 rounded-xl font-semibold hover:bg-orange-700 transition">
+          Client
+        </button>
+        <button type="submit" name="role" value="couturier" class="bg-gray-800 text-white py-3 rounded-xl font-semibold hover:bg-gray-900 transition">
+          Couturier
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

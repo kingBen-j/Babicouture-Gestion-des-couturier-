@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer une commande personnalisée - Babi Couture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <a href="{% url 'client_dashboard' %}" class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-orange-600 rounded-full"></div>
+                    <span class="text-xl font-semibold text-gray-900">Babi Couture</span>
+                </a>
+                <div class="flex items-center gap-4">
+                    <a href="{% url 'client_dashboard' %}" class="text-gray-700 hover:text-orange-600">
+                        <i class="fas fa-home mr-1"></i> Tableau de bord
+                    </a>
+                    <a href="{% url 'logout' %}" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl font-semibold transition">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Déconnexion
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenu principal -->
+    <main class="container mx-auto px-6 py-8">
+        <div class="max-w-3xl mx-auto">
+            <!-- En-tête -->
+            <div class="mb-8">
+                <a href="{% url 'client_dashboard' %}" class="inline-flex items-center text-orange-600 hover:text-orange-700 mb-4">
+                    <i class="fas fa-arrow-left mr-2"></i> Retour au tableau de bord
+                </a>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Créer une commande personnalisée</h1>
+                <p class="text-gray-600">Remplissez les détails de votre projet sur mesure. Un couturier vous contactera pour discuter des détails.</p>
+            </div>
+
+            <!-- Formulaire -->
+            <div class="bg-white rounded-2xl shadow-lg p-8">
+                <form method="post" enctype="multipart/form-data" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Titre -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-heading mr-2"></i>Titre de la commande *
+                        </label>
+                        <input type="text" name="titre" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                               placeholder="Ex: Robe de soirée rouge pour mariage">
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-align-left mr-2"></i>Description détaillée *
+                        </label>
+                        <textarea name="description" rows="4" required
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                  placeholder="Décrivez votre projet en détails : style, occasion, préférences..."></textarea>
+                    </div>
+
+                    <!-- Couturier -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-user-tie mr-2"></i>Choisissez un couturier *
+                        </label>
+                        <select name="couturier" required 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                            <option value="">Sélectionnez un couturier</option>
+                            {% for couturier in couturiers %}
+                                <option value="{{ couturier.id }}">
+                                    {{ couturier.user.get_full_name|default:couturier.user.username }}
+                                    {% if couturier.note_calculee %}
+                                        - {{ couturier.note_calculee|floatformat:1 }} ⭐ ({{ couturier.nb_evaluations }} avis)
+                                    {% endif %}
+                                    {% if couturier.specialite %}
+                                        - Spécialité : {{ couturier.specialite }}
+                                    {% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <p class="text-sm text-gray-500 mt-1">Choisissez un couturier selon sa spécialité et ses notes</p>
+                    </div>
+
+                    <!-- Informations sur les mesures -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Taille -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-ruler mr-2"></i>Taille
+                            </label>
+                            <input type="text" name="taille" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                   placeholder="Ex: M, 38, S, etc.">
+                        </div>
+
+                        <!-- Couleurs -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-palette mr-2"></i>Couleurs souhaitées
+                            </label>
+                            <input type="text" name="couleurs" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                   placeholder="Ex: Rouge, Bleu marine, Or">
+                        </div>
+                    </div>
+
+                    <!-- Budget et date -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Budget -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-money-bill-wave mr-2"></i>Budget estimé (FCFA)
+                            </label>
+                            <input type="number" name="prix_propose" min="0" step="1000"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                   placeholder="Ex: 25000">
+                        </div>
+
+                        <!-- Date de livraison -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-calendar-alt mr-2"></i>Date de livraison souhaitée
+                            </label>
+                            <input type="date" name="date_livraison_prevue" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                        </div>
+                    </div>
+
+                    <!-- Mesures détaillées -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-ruler-combined mr-2"></i>Mesures détaillées (facultatif)
+                        </label>
+                        <textarea name="mesures" rows="3"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                  placeholder="Exemple : Tour de poitrine: 90cm, Tour de taille: 70cm, Tour de hanches: 95cm, Longueur épaule-taille: 42cm"></textarea>
+                        <p class="text-sm text-gray-500 mt-1">Si vous avez vos mesures, cela aide le couturier à mieux vous servir</p>
+                    </div>
+
+                    <!-- Autres préférences -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-star mr-2"></i>Autres préférences et détails
+                        </label>
+                        <textarea name="preferences" rows="3"
+                                  class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                  placeholder="Style, tissus préférés, détails spéciaux, accessoires..."></textarea>
+                    </div>
+
+                    <!-- Photos de référence -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-images mr-2"></i>Photos de référence (facultatif)
+                        </label>
+                        <input type="file" name="photos" multiple accept="image/*"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                        <p class="text-sm text-gray-500 mt-1">Vous pouvez télécharger jusqu'à 5 photos (JPG, PNG). Des photos aident le couturier à mieux comprendre votre vision.</p>
+                    </div>
+
+                    <!-- Boutons -->
+                    <div class="flex gap-4 pt-6">
+                        <button type="submit" 
+                                class="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-xl font-semibold transition flex-1 flex items-center justify-center">
+                            <i class="fas fa-paper-plane mr-2"></i> Envoyer la demande
+                        </button>
+                        <a href="{% url 'client_dashboard' %}" 
+                           class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-8 py-3 rounded-xl font-semibold transition flex-1 text-center">
+                            Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Conseils -->
+            <div class="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-blue-800 mb-3">
+                    <i class="fas fa-lightbulb mr-2"></i>Conseils pour une bonne commande
+                </h3>
+                <ul class="space-y-2 text-blue-700">
+                    <li><i class="fas fa-check-circle mr-2"></i>Soyez le plus précis possible dans votre description</li>
+                    <li><i class="fas fa-check-circle mr-2"></i>Incluez des photos de référence si possible</li>
+                    <li><i class="fas fa-check-circle mr-2"></i>Précisez l'occasion (mariage, soirée, quotidien...)</li>
+                    <li><i class="fas fa-check-circle mr-2"></i>Indiquez vos préférences de tissu si vous en avez</li>
+                    <li><i class="fas fa-check-circle mr-2"></i>Le couturier vous contactera pour discuter des détails et du prix final</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <!-- Pied de page -->
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-6 py-8">
+            <div class="text-center">
+                <p class="text-gray-400">&copy; 2024 Babi Couture. Tous droits réservés.</p>
+                <p class="text-gray-400 text-sm mt-2">La couture à la demande, simplifiée.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
